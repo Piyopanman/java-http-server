@@ -28,9 +28,9 @@ public class Main {
 
             // レスポンス
             out.write("HTTP/1.1 200 OK\r\n".getBytes());
-            out.write("Content-type: text/plain\r\n".getBytes());
+            out.write("Content-type: text/plain; charset=UTF-8\r\n".getBytes());
             out.write(CRLF.getBytes());
-            out.write("aaaaaaaaaa\r\n".getBytes());
+            out.write("Hello, World!\r\n".getBytes());
             out.flush();
 
         } catch (Exception e) {

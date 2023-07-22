@@ -23,10 +23,10 @@ public class Main {
             request.stdOutputMessage();
 
             // レスポンス
-            Path path = Paths.get(request.getRequestLine().getPath());
             out.write("HTTP/1.1 200 OK\r\n".getBytes());
             out.write("Content-type: text/html; charset=UTF-8\r\n".getBytes());
             out.write(CRLF.getBytes());
+            Path path = request.getRequestLine().getPath();
             out.write(Files.readString(path).getBytes());
 
         } catch (Exception e) {

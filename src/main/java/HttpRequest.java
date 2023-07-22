@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -54,14 +56,14 @@ public class HttpRequest {
     class RequestLine {
         private String requestLine;
         private String httpMethod;
-        private String path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
+        private Path path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
         private String protocolVersion;
 
         public RequestLine(String requestLine) {
             this.requestLine = requestLine;
             String[] requestLineElements = requestLine.split(" ");
             this.httpMethod = requestLineElements[0];
-            this.path = requestLineElements[1].substring(1);
+            this.path = Paths.get(requestLineElements[1].substring(1));
             this.protocolVersion = requestLineElements[2];
         }
 
@@ -69,7 +71,7 @@ public class HttpRequest {
         public String getHttpMethod() {
             return this.httpMethod;
         }
-        public String getPath() {
+        public Path getPath() {
             return this.path;
         }
 

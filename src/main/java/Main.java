@@ -20,11 +20,29 @@ public class Main {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         ){
             // リクエストを標準出力
+//            String line = reader.readLine();
+//            while(!line.isEmpty()) {
+//                System.out.println(line);
+//                line = reader.readLine();
+//            }
+
+            // リクエストラインの解析
+            // 空白で区切り、最初がメソッド、次がURI、最後がプロトコルバージョン
+            String requestLine = reader.readLine();
+            String[] requestLineElements = requestLine.split(" ");
+            String httpMethod = requestLineElements[0];
+            String path = requestLineElements[1];
+            String protocolVersion = requestLineElements[2];
+            // リクエストラインを出力
+            System.out.printf("%s %s %s%s", httpMethod, path, protocolVersion, CRLF);
+            // リクエストヘッダーを出力
             String line = reader.readLine();
             while(!line.isEmpty()) {
                 System.out.println(line);
                 line = reader.readLine();
             }
+            //
+
 
             // レスポンス
             out.write("HTTP/1.1 200 OK\r\n".getBytes());

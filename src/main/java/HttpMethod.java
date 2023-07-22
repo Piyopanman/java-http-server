@@ -11,5 +11,10 @@ public enum HttpMethod {
         this.methodName = methodName;
     }
 
+    @Override
+    public String toString() {
+        return this.methodName;
+    }
+
 
 }

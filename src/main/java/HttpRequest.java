@@ -43,24 +43,41 @@ public class HttpRequest {
         headerField.entrySet()
                 .forEach(field -> System.out.printf("%s: %s%s", field.getKey(), field.getValue(), CRLF));
     }
-}
 
-class RequestLine {
-    private String requestLine;
-    private String httpMethod;
-    private String path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
-    private String protocolVersion;
-
-    public RequestLine(String requestLine) {
-        this.requestLine = requestLine;
-        String[] requestLineElements = requestLine.split(" ");
-        this.httpMethod = requestLineElements[0];
-        this.path = requestLineElements[1];
-        this.protocolVersion = requestLineElements[2];
-    }
-
-    @Override
-    public String toString() {
+    // Getter
+    public RequestLine getRequestLine() {
         return this.requestLine;
     }
+
+
+    // メンバクラスとしてRequestLineクラスを定義
+    class RequestLine {
+        private String requestLine;
+        private String httpMethod;
+        private String path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
+        private String protocolVersion;
+
+        public RequestLine(String requestLine) {
+            this.requestLine = requestLine;
+            String[] requestLineElements = requestLine.split(" ");
+            this.httpMethod = requestLineElements[0];
+            this.path = requestLineElements[1].substring(1);
+            this.protocolVersion = requestLineElements[2];
+        }
+
+        // Getter
+        public String getHttpMethod() {
+            return this.httpMethod;
+        }
+        public String getPath() {
+            return this.path;
+        }
+
+
+        @Override
+        public String toString() {
+            return this.requestLine;
+        }
+    }
+
 }

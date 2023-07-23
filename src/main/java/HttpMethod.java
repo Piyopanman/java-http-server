@@ -6,8 +6,7 @@ public enum HttpMethod {
     ;
 
     private final String methodName;
-
-    private HttpMethod(String methodName) {
+    HttpMethod(String methodName) {
         this.methodName = methodName;
     }
 

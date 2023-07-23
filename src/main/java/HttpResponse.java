@@ -24,6 +24,7 @@ public class HttpResponse {
     public HttpResponse(OutputStream out, HttpRequest request) {
         this.request = request;
         this.out = out;
+        statusLine = new StatusLine();
     }
 
     public void response() throws IOException {
@@ -35,7 +36,8 @@ public class HttpResponse {
 
     private void writeStatusLine() throws IOException {
         // TODO: ステータスコードとかをいい感じに取得する（メンバクラスを利用）
-       this.out.write("HTTP/1.1 200 OK\r\n".getBytes());
+//       this.out.write("HTTP/1.1 200 OK\r\n".getBytes());
+       this.out.write(String.format("%s %s%s", this.statusLine.getProtocolVersion(), this.statusLine.getStatus(), CRLF).getBytes());
     }
 
     private void writeHeaderFields() throws IOException {
@@ -50,8 +52,11 @@ public class HttpResponse {
             Path path = requestLine.getPath();
             if(Files.exists(path)) {
                 this.out.write(Files.readString(path).getBytes());
+                this.statusLine.setStatus(Status.OK);
             } else {
                 this.out.write(Files.readString(NOT_FOUND_PAGE_PATH).getBytes());
+                this.statusLine.setStatus(Status.NOT_FOUND);
+                // TODO: survey the reason for statusCode is 200 when recieve GET request of not-exist html file
             }
         }
     }
@@ -70,11 +75,28 @@ public class HttpResponse {
 
     // メンバクラスとしてStatusLineクラスを定義
     class StatusLine {
-        private String protocolVersion;
-        private Map<Integer, String> statusMap;
+        private final String protocolVersion = "HTTP/1.1";
+        private Status status;
 
         public StatusLine() {
+            // when status is decited?
+            // Considering only 200 and 404, after checking the path exists.
+            // TODO: fix this
+            this.status = Status.NOT_FOUND;
+        }
 
+        // Getter
+        public String getProtocolVersion() {
+            return this.protocolVersion;
+        }
+
+        public Status getStatus(){
+            return this.status;
+        }
+
+        // Setter
+        public void setStatus(Status status) {
+            this.status = status;
         }
     }
 }

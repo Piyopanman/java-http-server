@@ -1,12 +1,9 @@
 package main.java;
 
-import jdk.jfr.ContentType;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,16 +12,16 @@ import static main.java.Constant.*;
 
 
 public class HttpResponse {
-    private HttpRequest request;
-    private StatusLine statusLine;
-    private OutputStream out;
+    private final HttpRequest request;
+    private final StatusLine statusLine;
+    private final OutputStream out;
     private Map<String, String> headerField = new HashMap<>();
     private String body;
 
-    public HttpResponse(OutputStream out, HttpRequest request) {
+    public HttpResponse(OutputStream out, HttpRequest request, Status status) {
         this.request = request;
         this.out = out;
-        statusLine = new StatusLine();
+        statusLine = new StatusLine(status);
     }
 
     public void response() throws IOException {
@@ -35,8 +32,6 @@ public class HttpResponse {
     }
 
     private void writeStatusLine() throws IOException {
-        // TODO: ステータスコードとかをいい感じに取得する（メンバクラスを利用）
-//       this.out.write("HTTP/1.1 200 OK\r\n".getBytes());
        this.out.write(String.format("%s %s%s", this.statusLine.getProtocolVersion(), this.statusLine.getStatus(), CRLF).getBytes());
     }
 
@@ -49,21 +44,15 @@ public class HttpResponse {
         HttpRequest.RequestLine requestLine = this.request.getRequestLine();
         // GETかつtext/html
         if(Objects.equals(requestLine.getHttpMethod(), HttpMethod.GET.name()) && isContentTypeHtml()) {
-            Path path = requestLine.getPath();
-            if(Files.exists(path)) {
-                this.out.write(Files.readString(path).getBytes());
-                this.statusLine.setStatus(Status.OK);
-            } else {
+            if(this.statusLine.getStatus() == Status.OK) {
+                this.out.write(Files.readString(requestLine.getPath()).getBytes());
+            } else if (this.statusLine.getStatus() == Status.NOT_FOUND) {
                 this.out.write(Files.readString(NOT_FOUND_PAGE_PATH).getBytes());
-                this.statusLine.setStatus(Status.NOT_FOUND);
-                // TODO: survey the reason for statusCode is 200 when recieve GET request of not-exist html file
             }
         }
     }
 
-
     private boolean isContentTypeHtml() {
-        // pathの拡張子で判断する
         Path path = this.request.getRequestLine().getPath();
         return path.toString().endsWith("html");
     }
@@ -72,17 +61,13 @@ public class HttpResponse {
 
     // memo
     // - make enum of content-type
-
-    // メンバクラスとしてStatusLineクラスを定義
+    
     class StatusLine {
         private final String protocolVersion = "HTTP/1.1";
-        private Status status;
+        private final Status status;
 
-        public StatusLine() {
-            // when status is decited?
-            // Considering only 200 and 404, after checking the path exists.
-            // TODO: fix this
-            this.status = Status.NOT_FOUND;
+        public StatusLine(Status status) {
+            this.status = status;
         }
 
         // Getter
@@ -94,9 +79,5 @@ public class HttpResponse {
             return this.status;
         }
 
-        // Setter
-        public void setStatus(Status status) {
-            this.status = status;
-        }
     }
 }

@@ -22,7 +22,14 @@ public class Main {
             HttpRequest request = new HttpRequest(in);
             request.stdOutputMessage();
 
-            HttpResponse response = new HttpResponse(out, request);
+            Status status;
+            boolean isRequestedFileExists = Files.exists(request.getRequestLine().getPath());
+            if(isRequestedFileExists) {
+                status = Status.OK;
+            } else {
+                status = Status.NOT_FOUND;
+            }
+            HttpResponse response = new HttpResponse(out, request, status);
             response.response();
 
         } catch (Exception e) {

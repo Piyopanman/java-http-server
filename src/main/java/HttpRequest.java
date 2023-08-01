@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -63,7 +65,8 @@ public class HttpRequest {
             this.requestLine = requestLine;
             String[] requestLineElements = requestLine.split(" ");
             this.httpMethod = requestLineElements[0];
-            this.path = Paths.get(requestLineElements[1].substring(1));
+            String decodedPath = URLDecoder.decode(requestLineElements[1].substring(1), StandardCharsets.UTF_8);
+            this.path = Paths.get(decodedPath);
             this.protocolVersion = requestLineElements[2];
         }
 

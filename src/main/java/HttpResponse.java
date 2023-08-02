@@ -52,13 +52,20 @@ public class HttpResponse {
         HttpRequest.RequestLine requestLine = this.request.getRequestLine();
         Path path = requestLine.getPath();
         // GETかつtext/html
-        if(Objects.equals(requestLine.getHttpMethod(), HttpMethod.GET.name()) 
+        if(requestLine.getHttpMethod().equals(HttpMethod.GET.name())
                 && Objects.equals(ContentType.getMIMEType(path), "text/html")) {
             if(this.statusLine.getStatus() == Status.OK) {
                 this.out.write(Files.readString(path).getBytes());
             } else if (this.statusLine.getStatus() == Status.NOT_FOUND) {
                 this.out.write(Files.readString(NOT_FOUND_PAGE_PATH).getBytes());
             }
+        }if(requestLine.getHttpMethod().equals(HttpMethod.POST.name())) {
+            /*
+            TODO: メッセージボディで渡ってきたものを、 Content-Length分読み、標準出力する
+            必要なもの：リクエストのメッセージボディ、Content-Length
+            メッセージボディの読み方：リクエスト側でもう読めている？注意：ヘッダーフィールドはマップで保持している
+            出力の仕方：標準出力
+             */
         }
     }
 

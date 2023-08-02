@@ -16,22 +16,38 @@ import java.util.Map;
 import static main.java.Constant.CRLF;
 
 public class HttpRequest {
+    private BufferedReader reader;
     private RequestLine requestLine;
     private Map<String, String> headerField = new HashMap<>();
+    private String messageBody;
 
     public HttpRequest(InputStream in) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        this.reader = new BufferedReader(new InputStreamReader(in));
         this.requestLine = new RequestLine(reader.readLine());
-        putRequestHeaderField(reader);
+        putRequestHeaderField();
+        putMessageBody();
     }
 
-    private void putRequestHeaderField(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
+    private void putRequestHeaderField() throws IOException {
+        String line = this.reader.readLine();
         while(!line.isEmpty()) {
             List<String> field = Arrays.stream(line.split(":")).map(String::trim).toList();
             headerField.put(field.get(0), field.get(1));
-            line = reader.readLine();
+            line = this.reader.readLine();
         }
+    }
+
+    private void putMessageBody() throws IOException {
+        // HeaderFieldからcontent-lengthを探す
+        int length = Integer.parseInt(headerField.get("Content-Length"));
+        StringBuilder stringBuilder = new StringBuilder();
+        int i = reader.read();
+        for (int j = 0; j < length; j++) {
+            char c = (char) i;
+            stringBuilder.append(c);
+            i = reader.read();
+        }
+        this.messageBody = stringBuilder.toString();
     }
 
     public void stdOutputMessage() {
@@ -48,6 +64,10 @@ public class HttpRequest {
                 .forEach(field -> System.out.printf("%s: %s%s", field.getKey(), field.getValue(), CRLF));
     }
 
+    private void stdOutputMessageBody() {
+        System.out.println(this.messageBody);
+    }
+
     // Getter
     public RequestLine getRequestLine() {
         return this.requestLine;
@@ -58,7 +78,7 @@ public class HttpRequest {
     class RequestLine {
         private String requestLine;
         private String httpMethod;
-        private Path path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
+        private Path path;
         private String protocolVersion;
 
         public RequestLine(String requestLine) {

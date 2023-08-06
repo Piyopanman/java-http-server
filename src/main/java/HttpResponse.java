@@ -27,10 +27,15 @@ public class HttpResponse {
         headerFieldMap.put("Content-Type", ContentType.getMIMEType(request.getRequestLine().getPath()));
     }
 
-    public void response() throws IOException {
-        writeStatusLine();
-        writeHeaderFields();
-        this.out.write(CRLF.getBytes());
+    public void response()  {
+        try {
+            writeStatusLine();
+            writeHeaderFields();
+            this.out.write(CRLF.getBytes());
+        } catch (IOException e) {
+            System.err.println("Error in response method");
+            e.printStackTrace();
+        }
         writeBody();
     }
 
@@ -43,22 +48,28 @@ public class HttpResponse {
             try {
                 this.out.write(String.format("%s: %s%s", key, value, CRLF).getBytes());
             } catch (IOException e) {
+                System.err.println("Error in writeHeaderFilelds method");
                 throw new RuntimeException(e);
             }
         });
     }
 
-    private void writeBody() throws IOException {
+    private void writeBody() {
         HttpRequest.RequestLine requestLine = this.request.getRequestLine();
         Path path = requestLine.getPath();
         // GETかつtext/html
         if(requestLine.getHttpMethod().equals(HttpMethod.GET.name())
                 && Objects.equals(ContentType.getMIMEType(path), "text/html")) {
-            if(this.statusLine.getStatus() == Status.OK) {
-                this.out.write(Files.readString(path).getBytes());
-            } else if (this.statusLine.getStatus() == Status.NOT_FOUND) {
-                this.out.write(Files.readString(NOT_FOUND_PAGE_PATH).getBytes());
+            try {
+                if(this.statusLine.getStatus() == Status.OK) {
+                    this.out.write(Files.readString(path).getBytes());
+                } else if (this.statusLine.getStatus() == Status.NOT_FOUND) {
+                    this.out.write(Files.readString(NOT_FOUND_PAGE_PATH).getBytes());
+                }
+            } catch (IOException e) {
+                System.err.println("Error in writeBody method");
             }
+
         }if(requestLine.getHttpMethod().equals(HttpMethod.POST.name())) {
             /*
             TODO: メッセージボディで渡ってきたものを、 Content-Length分読み、標準出力する

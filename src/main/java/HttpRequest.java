@@ -25,7 +25,9 @@ public class HttpRequest {
         this.reader = new BufferedReader(new InputStreamReader(in));
         this.requestLine = new RequestLine(reader.readLine());
         putRequestHeaderField();
-        putMessageBody();
+        if(requestLine.getHttpMethod().equals(HttpMethod.POST.name())) {
+            putMessageBody();
+        }
     }
 
     private void putRequestHeaderField() throws IOException {
@@ -37,17 +39,29 @@ public class HttpRequest {
         }
     }
 
-    private void putMessageBody() throws IOException {
+    private void putMessageBody() {
         // HeaderFieldからcontent-lengthを探す
         int length = Integer.parseInt(headerField.get("Content-Length"));
         StringBuilder stringBuilder = new StringBuilder();
-        int i = reader.read();
-        for (int j = 0; j < length; j++) {
-            char c = (char) i;
-            stringBuilder.append(c);
-            i = reader.read();
+        try {
+            int i = reader.read();
+            int count = 0;
+            while(true) {
+                count++;
+                char c = (char) i;
+                stringBuilder.append(c);
+                if(count == length) {
+                    break;
+                }
+                i = reader.read();
+            }
+            this.messageBody = stringBuilder.toString();
+        } catch (IOException e) {
+            System.err.println("Error in putMessageBody");
+            e.printStackTrace();
         }
-        this.messageBody = stringBuilder.toString();
+
+
     }
 
     public void stdOutputMessage() {

@@ -70,13 +70,6 @@ public class HttpResponse {
                 System.err.println("Error in writeBody method");
             }
 
-        }if(requestLine.getHttpMethod().equals(HttpMethod.POST.name())) {
-            /*
-            TODO: メッセージボディで渡ってきたものを、 Content-Length分読み、標準出力する
-            必要なもの：リクエストのメッセージボディ、Content-Length
-            メッセージボディの読み方：リクエスト側でもう読めている？注意：ヘッダーフィールドはマップで保持している
-            出力の仕方：標準出力
-             */
         }
     }
 

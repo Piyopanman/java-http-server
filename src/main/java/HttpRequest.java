@@ -67,6 +67,10 @@ public class HttpRequest {
     public void stdOutputMessage() {
         stdOutputRequestLine();
         stdOutputRequestHeaderField();
+        if(this.messageBody != null) {
+            System.out.print(CRLF);
+            stdOutputMessageBody();
+        }
     }
 
     private void stdOutputRequestLine() {
@@ -111,7 +115,6 @@ public class HttpRequest {
         public Path getPath() {
             return this.path;
         }
-
 
         @Override
         public String toString() {

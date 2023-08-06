@@ -16,27 +16,61 @@ import java.util.Map;
 import static main.java.Constant.CRLF;
 
 public class HttpRequest {
+    private BufferedReader reader;
     private RequestLine requestLine;
     private Map<String, String> headerField = new HashMap<>();
+    private String messageBody;
 
     public HttpRequest(InputStream in) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        this.reader = new BufferedReader(new InputStreamReader(in));
         this.requestLine = new RequestLine(reader.readLine());
-        putRequestHeaderField(reader);
+        putRequestHeaderField();
+        if(requestLine.getHttpMethod().equals(HttpMethod.POST.name())) {
+            putMessageBody();
+        }
     }
 
-    private void putRequestHeaderField(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
+    private void putRequestHeaderField() throws IOException {
+        String line = this.reader.readLine();
         while(!line.isEmpty()) {
             List<String> field = Arrays.stream(line.split(":")).map(String::trim).toList();
             headerField.put(field.get(0), field.get(1));
-            line = reader.readLine();
+            line = this.reader.readLine();
         }
+    }
+
+    private void putMessageBody() {
+        // HeaderFieldからcontent-lengthを探す
+        int length = Integer.parseInt(headerField.get("Content-Length"));
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            int i = reader.read();
+            int count = 0;
+            while(true) {
+                count++;
+                char c = (char) i;
+                stringBuilder.append(c);
+                if(count == length) {
+                    break;
+                }
+                i = reader.read();
+            }
+            this.messageBody = stringBuilder.toString();
+        } catch (IOException e) {
+            System.err.println("Error in putMessageBody");
+            e.printStackTrace();
+        }
+
+
     }
 
     public void stdOutputMessage() {
         stdOutputRequestLine();
         stdOutputRequestHeaderField();
+        if(this.messageBody != null) {
+            System.out.print(CRLF);
+            stdOutputMessageBody();
+        }
     }
 
     private void stdOutputRequestLine() {
@@ -46,6 +80,10 @@ public class HttpRequest {
     private void stdOutputRequestHeaderField() {
         headerField.entrySet()
                 .forEach(field -> System.out.printf("%s: %s%s", field.getKey(), field.getValue(), CRLF));
+    }
+
+    private void stdOutputMessageBody() {
+        System.out.println(this.messageBody);
     }
 
     // Getter
@@ -58,7 +96,7 @@ public class HttpRequest {
     class RequestLine {
         private String requestLine;
         private String httpMethod;
-        private Path path;  // Pathクラスみたいなやつあった気がするが一旦ストリング
+        private Path path;
         private String protocolVersion;
 
         public RequestLine(String requestLine) {
@@ -77,7 +115,6 @@ public class HttpRequest {
         public Path getPath() {
             return this.path;
         }
-
 
         @Override
         public String toString() {
